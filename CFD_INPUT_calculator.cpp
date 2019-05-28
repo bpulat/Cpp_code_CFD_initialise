@@ -53,8 +53,9 @@ double interp_result;
 double boundary_layer_thickness,reynolds_number_for_downstream;
 double turbulence_intensity,turbulence_length_scale,max_turbulence_length_scale;
 int altitude_choice;
-double turbulent_dissipation_rate,turbulent_kinetic_energy;
-
+double turbulent_dissipation_rate,turbulent_kinetic_energy,turbulence_specific_dissipation_rate;
+double turbulent_length_scale_commercial_softwares;
+double Cmu = 0.09;        // An emprical constant specified in the turbulence model (approx. 0.09)
 //Time and Date
 std::string monthString[] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 std::string dayString[] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
@@ -121,6 +122,7 @@ void write_file() {
     if (turbulence_length_scale != 0) {
       myfile << "Turbulence Length Scale: " << turbulence_length_scale << "[m]" << "\n";
       myfile << "Maximum Turbulence Length Scale: " << max_turbulence_length_scale<< "[m]" << "\n";
+      myfile << "Turbulence Length Scale of Commercial CFD Solvers : " << turbulent_length_scale_commercial_softwares<< "[m]" << "\n";
     }
     if (turbulent_kinetic_energy != 0){
       myfile << "Turbulent Kinetic Energy : " << turbulent_kinetic_energy << "[m^2/s^2]" << "\n";
@@ -162,7 +164,6 @@ void turbulence_length_scale_calculator() {
   boundary_layer_thickness = 0.37 * domain_c / pow(reynolds_number_for_downstream,0.2);
   turbulence_length_scale = 0.4 * boundary_layer_thickness; // Fluent Manual
   max_turbulence_length_scale = 0.07 * hydraulic_diameter;  // Wikipedia
-
 }
 void linear_interpolation(double input, double array1[], double array2[]){
   // this function takes input compares it in array1 and interpolates the data through array2
@@ -207,13 +208,23 @@ void turbulent_kinetic_energy_calculator(){
   turbulence_intensity_calculator();
   turbulent_kinetic_energy = 3/2 * pow((velocity*turbulence_intensity/100),2);
 }
-void turbulent_dissipation_rate_calculator(){
+void turbulent_dissipation_rate_calculator(){ // Also as know as epsilon in (k-e turbulence model)
   turbulence_length_scale_calculator();
   turbulence_intensity_calculator();
-  double Cmu = 0.09;         // An emprical constant specified in the turbulence model (approx. 0.09)
   turbulent_dissipation_rate = pow(Cmu,0.75)*pow(turbulent_kinetic_energy,1.5)/turbulence_length_scale;
+}
+void turbulence_specific_dissipation_rate_calculator(){
+  // Also as known as omega in (k-w SST model w)
+  turbulent_kinetic_energy_calculator();
+
+  turbulence_specific_dissipation_rate = pow(turbulent_kinetic_energy,0.5)/(Cmu*turbulence_length_scale);
 
 
+}
+void turbulent_length_scale_commercial_softwares_calculator(){
+  turbulent_kinetic_energy_calculator();
+  turbulent_dissipation_rate_calculator();
+  turbulent_length_scale_commercial_softwares = pow(Cmu,0.75)*pow(turbulent_kinetic_energy,1.5)/turbulent_dissipation_rate;
 }
 void yplus_calculator() {
   reynolds = velocity*density*hydraulic_diameter/dynamic_viscosity;
@@ -389,9 +400,12 @@ int main() {
       break;
       case 3:
       turbulence_length_scale_calculator();
+      turbulent_length_scale_commercial_softwares_calculator();
       std::cout << "Turbulence Length Scale : " << turbulence_length_scale << "[m]" << "\n";
       std::cout << "\n";
       std::cout << "Maximum Turbulence Length Scale : " << max_turbulence_length_scale<< "[m]" << "\n";
+      std::cout << "\n";
+      std::cout << "Turbulence Length Scale of Commercial CFD Solvers : "<< turbulent_length_scale_commercial_softwares<< "[m]" << "\n";
       std::cout << "\n";
 
       break;
