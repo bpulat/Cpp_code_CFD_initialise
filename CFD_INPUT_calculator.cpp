@@ -4,7 +4,7 @@ CFD INPUT CALCULATOR made for EIE GROUP SRL by Baris PULAT 05/04/2019
 - Revision 11/04/2019 output file now has the time, date in the outpus and some bugs are fixed.
 - Revision 27/05/2019 fix turbulent_dissipation_rate and turbulent_kinetic_energy and its plots, fix
 plotting the values.
-
+- Adjust all openfoam inputs
 * Possible next revision adding also thermal properties. (Calculation of Nusselt Number etc..)
 
 */
