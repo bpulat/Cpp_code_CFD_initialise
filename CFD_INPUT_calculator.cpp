@@ -54,6 +54,7 @@ double boundary_layer_thickness,reynolds_number_for_downstream;
 double turbulence_intensity,turbulence_length_scale,max_turbulence_length_scale;
 int altitude_choice;
 double turbulent_dissipation_rate,turbulent_kinetic_energy;
+  double Cmu = 0.09;         // An emprical constant specified in the turbulence model (approx. 0.09)
 
 //Time and Date
 std::string monthString[] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
@@ -205,12 +206,12 @@ void wall_space_calculator(){
 }
 void turbulent_kinetic_energy_calculator(){
   turbulence_intensity_calculator();
-  turbulent_kinetic_energy = 3/2 * pow((velocity*turbulence_intensity/100),2);
+  turbulent_kinetic_energy = 1.5 * pow((velocity*turbulence_intensity/100),2);
 }
 void turbulent_dissipation_rate_calculator(){
   turbulence_length_scale_calculator();
   turbulence_intensity_calculator();
-  double Cmu = 0.09;         // An emprical constant specified in the turbulence model (approx. 0.09)
+
   turbulent_dissipation_rate = pow(Cmu,0.75)*pow(turbulent_kinetic_energy,1.5)/turbulence_length_scale;
 
 
