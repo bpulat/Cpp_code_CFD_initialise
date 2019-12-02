@@ -360,7 +360,7 @@ void first_inputs() {
 int main() {
   int input;
 
-  std::cout << "\t\t***** Welcome To the CFD Input Calculator v02*****" << "\n\n";
+  std::cout << "\t\t***** Welcome To the CFD Input Calculator v03*****" << "\n\n";
   std::cout << "- This tool is used for calculating CFD inputs with dry air properties." << "\n";
   std::cout << "- Aim of this program is to find characteristics of Turbulent Flows!" << "\n";
   std::cout << "- For the numerical inputs if you enter a character program won't work." << "\n\n";
@@ -401,11 +401,9 @@ int main() {
       case 3:
       turbulence_length_scale_calculator();
       turbulent_length_scale_commercial_softwares_calculator();
-      std::cout << "Turbulence Length Scale : " << turbulence_length_scale << "[m]" << "\n";
-      std::cout << "\n";
       std::cout << "Maximum Turbulence Length Scale : " << max_turbulence_length_scale<< "[m]" << "\n";
       std::cout << "\n";
-      std::cout << "Turbulence Length Scale of Commercial CFD Solvers : "<< turbulent_length_scale_commercial_softwares<< "[m]" << "\n";
+      std::cout << "Turbulence Length Scale for Commercial CFD Solvers : "<< turbulent_length_scale_commercial_softwares<< "[m]" << "\n";
       std::cout << "\n";
 
       break;
