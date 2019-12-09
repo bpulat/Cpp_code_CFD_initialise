@@ -9,13 +9,14 @@ plotting the values.
 
 */
 #include <iostream>
-#include <cmath>
+//#include <cmath>
 #include <float.h>
 #include <fstream>
 #include <string.h>
 #include <ctime>
 #include <iomanip>
 #include <string>
+#include <math.h>
 // Domain size variables representing 3 dimension variables in meters
 double domain_a,domain_b,domain_c;
 // Inlet velocity value
@@ -48,6 +49,7 @@ double Dynamic_Viscosity[] = {1.789*0.00001,1.783*0.00001,1.777*0.00001,
 1.608*0.00001,1.602*0.00001,1.595*0.00001,1.588*0.00001,1.582*0.00001,
 1.575*0.00001,1.568*0.00001,1.561*0.00001,1.527*0.00001,1.493*0.00001,
 1.458*0.00001,1.422*0.00001,1.422*0.00001,1.422*0.00001,1.422*0.00001};
+double desired_permeability_perc,desired_permeability,porous_thickness,resistance_coefficient;
 int array_length  = (sizeof(Altitude) / sizeof (*Altitude));
 double kinematic_viscosity;
 double interp_result;
@@ -247,6 +249,37 @@ void yplus_calculator() {
   yplus_resultant = first_layer_thickness_desired * frictional_velocity * density / dynamic_viscosity;
 
 }
+void permeability_calculator() {
+  std::cout << "\t\t Permeability Calculation" << "\n\n";
+  std::cout << "Enter the open are in as a percentage [%]: ";
+  std::cin >> desired_permeability_perc;
+  while(std::cin.fail() || desired_permeability_perc <= 0) {
+    std::cout << "ERROR INPUT!" << "\n";
+    std::cin.clear();
+    std::cin.ignore(256,'\n');
+    std::cout << "Enter the open are in as a percentage [%]: ";
+    std::cin >> desired_permeability_perc;
+  }
+  desired_permeability = desired_permeability_perc / 100;
+  std::cout << "\n";
+  std::cout << "Enter the thickness of your modeled porous media [m]: ";
+  std::cin >> porous_thickness;
+  while(std::cin.fail() || porous_thickness <= 0) {
+    std::cout << "ERROR INPUT!" << "\n";
+    std::cin.clear();
+    std::cin.ignore(256,'\n');
+    std::cout << "Enter the thickness of your modeled porous media [m]: ";
+    std::cin >> porous_thickness;
+    }
+    double f = desired_permeability;
+    std::cout << "f = " << f << "\n";
+//    1/f^2(sqrt2/2*(1-f)^0.375+(1-f))^2
+    resistance_coefficient = (1 / pow(f,2) * pow((pow(2,0.5) / 2 *pow((1-f),0.375)+(1-f)),2)) / porous_thickness;
+
+//    pow(0.707* pow((1-desired_permeability),0.5)+1-desired_permeability),2)*pow(desired_permeability,-2);
+
+
+}
 void first_inputs() {
 
   std::cout << "Enter your inlet velocity value [m/s]: " ;
@@ -384,8 +417,9 @@ int main() {
     std::cout << "6. Wall Space Calculator" << "\n";
     std::cout << "7. Y+ Calculator" << "\n";
     std::cout << "8. To Change Inputs" << "\n";
-    std::cout << "9. Write everything in a .txt file" << "\n\n";
-    std::cout << "10. Quit" << "\n\n";
+    std::cout << "9. Permeability Calculator" << "\n";
+    std::cout << "10. Write everything in a .txt file" << "\n\n";
+    std::cout << "11. Quit" << "\n\n";
     std::cout << "Selection:  ";
     std::cin >> input;
     std::cout << "\n";
@@ -441,9 +475,14 @@ int main() {
       std::cout << "\n";
       break;
       case 9:
-      write_file();
+      permeability_calculator();
+      std::cout << "Resistance coefficient : " << resistance_coefficient << "[1/m]" << "\n";
+      std::cout << "\n";
       break;
       case 10:
+      write_file();
+      break;
+      case 11:
       std::cout << "You have chosen Quit, Goodbye." << "\n";
       break;
       default:
@@ -451,7 +490,7 @@ int main() {
       break;
     }
     }
-    while(input !=10);
+    while(input !=11);
 
   return 0;
 }
