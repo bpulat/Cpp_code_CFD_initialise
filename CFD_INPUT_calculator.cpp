@@ -49,6 +49,7 @@ double Dynamic_Viscosity[] = {1.789*0.00001,1.783*0.00001,1.777*0.00001,
 1.575*0.00001,1.568*0.00001,1.561*0.00001,1.527*0.00001,1.493*0.00001,
 1.458*0.00001,1.422*0.00001,1.422*0.00001,1.422*0.00001,1.422*0.00001};
 int array_length  = (sizeof(Altitude) / sizeof (*Altitude));
+double kinematic_viscosity;
 double interp_result;
 double boundary_layer_thickness,reynolds_number_for_downstream;
 double turbulence_intensity,turbulence_length_scale,max_turbulence_length_scale;
@@ -103,6 +104,7 @@ void write_file() {
     else if(altitude_choice ==2){
       myfile << "Density: " << density << " [kg/m^3]" << "\n";
       myfile << "Dynamic Viscosity: " << dynamic_viscosity << " [Pa*s]" << "\n";
+      myfile << "Kinematic Viscosity: " << kinematic_viscosity << "[m^2/s]" << "\n";
 
     }
     myfile << "\n";
@@ -111,6 +113,7 @@ void write_file() {
     if (altitude_choice == 1) {
       myfile << "Density: " << density << " [kg/m^3]" << "\n";
       myfile << "Dynamic Viscosity: " << dynamic_viscosity << " [Pa*s]" << "\n";
+      myfile << "Kinematic Viscosity: " << kinematic_viscosity << "[m^2/s]" << "\n";
       myfile << "Pressure: " << pressure << " [kPa]" << "\n";
     }
     if (reynolds != 0) {
@@ -206,11 +209,11 @@ void wall_space_calculator(){
 }
 void turbulent_kinetic_energy_calculator(){
   turbulence_intensity_calculator();
-  turbulent_kinetic_energy = 3/2 * pow((velocity*turbulence_intensity/100),2);
+  turbulent_kinetic_energy = 1.5 * (velocity*turbulence_intensity/100)*(velocity*turbulence_intensity/100);
 }
 void turbulent_dissipation_rate_calculator(){ // Also as know as epsilon in (k-e turbulence model)
   turbulence_length_scale_calculator();
-  turbulence_intensity_calculator();
+  turbulent_kinetic_energy_calculator();
   turbulent_dissipation_rate = pow(Cmu,0.75)*pow(turbulent_kinetic_energy,1.5)/turbulence_length_scale;
 }
 void turbulence_specific_dissipation_rate_calculator(){
@@ -222,8 +225,8 @@ void turbulence_specific_dissipation_rate_calculator(){
 
 }
 void turbulent_length_scale_commercial_softwares_calculator(){
-  turbulent_kinetic_energy_calculator();
-  turbulent_dissipation_rate_calculator();
+//  turbulent_kinetic_energy_calculator();
+//  turbulent_dissipation_rate_calculator();
   turbulent_length_scale_commercial_softwares = pow(Cmu,0.75)*pow(turbulent_kinetic_energy,1.5)/turbulent_dissipation_rate;
 }
 void yplus_calculator() {
@@ -323,6 +326,8 @@ void first_inputs() {
       linear_interpolation(altitude,Altitude,Dynamic_Viscosity);
       dynamic_viscosity = interp_result;
       std::cout << "Dynamic Viscosity: " << dynamic_viscosity << "[Pa*s]" << "\n";
+      kinematic_viscosity = dynamic_viscosity / density;
+      std::cout << "Kinematic Viscosity: " << kinematic_viscosity << "[m^2/s]" << "\n";
       break;
       case 2:
       std::cout << "Enter your density value: " ;
@@ -343,7 +348,7 @@ void first_inputs() {
         std::cout << "Enter your dynamic viscosity value: " ;
         std::cin >> dynamic_viscosity;
       }
-
+      kinematic_viscosity = dynamic_viscosity / density;
       break;
       default:
       std::cout << "*********************************" << "\n";
@@ -360,7 +365,7 @@ void first_inputs() {
 int main() {
   int input;
 
-  std::cout << "\t\t***** Welcome To the CFD Input Calculator v03*****" << "\n\n";
+  std::cout << "\t\t***** Welcome To the CFD Input Calculator v04*****" << "\n\n";
   std::cout << "- This tool is used for calculating CFD inputs with dry air properties." << "\n";
   std::cout << "- Aim of this program is to find characteristics of Turbulent Flows!" << "\n";
   std::cout << "- For the numerical inputs if you enter a character program won't work." << "\n\n";
@@ -400,11 +405,11 @@ int main() {
       break;
       case 3:
       turbulence_length_scale_calculator();
-      turbulent_length_scale_commercial_softwares_calculator();
+      //turbulent_length_scale_commercial_softwares_calculator();
       std::cout << "Maximum Turbulence Length Scale : " << max_turbulence_length_scale<< "[m]" << "\n";
       std::cout << "\n";
-      std::cout << "Turbulence Length Scale for Commercial CFD Solvers : "<< turbulent_length_scale_commercial_softwares<< "[m]" << "\n";
-      std::cout << "\n";
+      //std::cout << "Turbulence Length Scale for Commercial CFD Solvers : "<< turbulent_length_scale_commercial_softwares<< "[m]" << "\n";
+      //std::cout << "\n";
 
       break;
       case 4:
