@@ -49,7 +49,8 @@ double Dynamic_Viscosity[] = {1.789*0.00001,1.783*0.00001,1.777*0.00001,
 1.608*0.00001,1.602*0.00001,1.595*0.00001,1.588*0.00001,1.582*0.00001,
 1.575*0.00001,1.568*0.00001,1.561*0.00001,1.527*0.00001,1.493*0.00001,
 1.458*0.00001,1.422*0.00001,1.422*0.00001,1.422*0.00001,1.422*0.00001};
-double desired_permeability_perc,desired_permeability,porous_thickness,resistance_coefficient;
+double desired_permeability_perc,desired_permeability,porous_thickness;
+double resistance_coefficient = 0;
 int array_length  = (sizeof(Altitude) / sizeof (*Altitude));
 double kinematic_viscosity;
 double interp_result;
@@ -106,7 +107,7 @@ void write_file() {
     else if(altitude_choice ==2){
       myfile << "Density: " << density << " [kg/m^3]" << "\n";
       myfile << "Dynamic Viscosity: " << dynamic_viscosity << " [Pa*s]" << "\n";
-      myfile << "Kinematic Viscosity: " << kinematic_viscosity << "[m^2/s]" << "\n";
+      myfile << "Kinematic Viscosity: " << kinematic_viscosity << " [m^2/s]" << "\n";
 
     }
     myfile << "\n";
@@ -115,37 +116,50 @@ void write_file() {
     if (altitude_choice == 1) {
       myfile << "Density: " << density << " [kg/m^3]" << "\n";
       myfile << "Dynamic Viscosity: " << dynamic_viscosity << " [Pa*s]" << "\n";
-      myfile << "Kinematic Viscosity: " << kinematic_viscosity << "[m^2/s]" << "\n";
+      myfile << "Kinematic Viscosity: " << kinematic_viscosity << " [m^2/s]" << "\n";
       myfile << "Pressure: " << pressure << " [kPa]" << "\n";
     }
     if (reynolds != 0) {
       myfile << "Reynolds Number: " << reynolds << "\n";
     }
     if (turbulence_intensity != 0) {
-      myfile << "Turbulence Intensity: " << turbulence_intensity << "[%]" <<"\n";
+      myfile << "Turbulence Intensity: " << turbulence_intensity << " [%]" <<"\n";
     }
     if (turbulence_length_scale != 0) {
-      myfile << "Turbulence Length Scale: " << turbulence_length_scale << "[m]" << "\n";
-      myfile << "Maximum Turbulence Length Scale: " << max_turbulence_length_scale<< "[m]" << "\n";
+      myfile << "Turbulence Length Scale: " << turbulence_length_scale << " [m]" << "\n";
+      myfile << "Maximum Turbulence Length Scale: " << max_turbulence_length_scale<< " [m]" << "\n";
       myfile << "Turbulence Length Scale of Commercial CFD Solvers : " << turbulent_length_scale_commercial_softwares<< "[m]" << "\n";
     }
     if (turbulent_kinetic_energy != 0){
-      myfile << "Turbulent Kinetic Energy : " << turbulent_kinetic_energy << "[m^2/s^2]" << "\n";
+      myfile << "Turbulent Kinetic Energy : " << turbulent_kinetic_energy << " [m^2/s^2]" << "\n";
     }
     if (turbulent_dissipation_rate !=0){
-      myfile << "Turbulent Dissipation Rate : " << turbulent_dissipation_rate << "[m^2/s^3]" << "\n";
+      myfile << "Turbulent Dissipation Rate : " << turbulent_dissipation_rate << " [m^2/s^3]" << "\n";
     }
     if (yplus_desired != 0){
       myfile << "\n";
       myfile << "Wall Space Calculation" << "\n";
+      myfile << "Input:" << "\n";
       myfile << "Desired y+ value: " << yplus_desired << "\n";
-      myfile << "Required First Layer Thickness: " << first_layer_thickness_resultant << "[m]" << "\n";
+      myfile << "Output:" << "\n";
+      myfile << "Required First Layer Thickness: " << first_layer_thickness_resultant << " [m]" << "\n";
     }
     if (first_layer_thickness_desired != 0){
       myfile << "\n";
       myfile << "YPlus Calculation" << "\n";
-      myfile << "Desired First Layer Thickness: " << first_layer_thickness_desired << "[m]" << "\n";
+      myfile << "Input:" << "\n";
+      myfile << "Desired First Layer Thickness: " << first_layer_thickness_desired << " [m]" << "\n";
+      myfile << "Output:" << "\n";
       myfile << "Y+ value: " << yplus_resultant << "\n";
+    }
+    if (resistance_coefficient != 0){
+      myfile << "\n";
+      myfile << "Permeability Calculation" << "\n";
+      myfile << "Input:" << "\n";
+      myfile << "Desired Permeability: " << desired_permeability_perc << " [%]" << "\n";
+      myfile << "Geometry thickness: " << porous_thickness << " [m]" << "\n";
+      myfile << "Output:" << "\n";
+      myfile << "Resistance coefficient: " << resistance_coefficient << " [1/m]" << "\n";
     }
     myfile << "\n\n";
     int year, month, day, hour, mins, secs, weekDay;
@@ -250,8 +264,9 @@ void yplus_calculator() {
 
 }
 void permeability_calculator() {
+  // Permeability calculation are done according to the formula of Idelchick (I.E:Idelchik, Flow Resistance, Hemisphere Publishing Corp., New York, 1989)
   std::cout << "\t\t Permeability Calculation" << "\n\n";
-  std::cout << "Enter the open are in as a percentage [%]: ";
+  std::cout << "Enter the open area in percentage [%]: ";
   std::cin >> desired_permeability_perc;
   while(std::cin.fail() || desired_permeability_perc <= 0) {
     std::cout << "ERROR INPUT!" << "\n";
@@ -262,7 +277,7 @@ void permeability_calculator() {
   }
   desired_permeability = desired_permeability_perc / 100;
   std::cout << "\n";
-  std::cout << "Enter the thickness of your modeled porous media [m]: ";
+  std::cout << "Enter the thickness of your porous media [m]: ";
   std::cin >> porous_thickness;
   while(std::cin.fail() || porous_thickness <= 0) {
     std::cout << "ERROR INPUT!" << "\n";
@@ -272,12 +287,8 @@ void permeability_calculator() {
     std::cin >> porous_thickness;
     }
     double f = desired_permeability;
-    std::cout << "f = " << f << "\n";
-//    1/f^2(sqrt2/2*(1-f)^0.375+(1-f))^2
+
     resistance_coefficient = (1 / pow(f,2) * pow((pow(2,0.5) / 2 *pow((1-f),0.375)+(1-f)),2)) / porous_thickness;
-
-//    pow(0.707* pow((1-desired_permeability),0.5)+1-desired_permeability),2)*pow(desired_permeability,-2);
-
 
 }
 void first_inputs() {
@@ -398,7 +409,7 @@ void first_inputs() {
 int main() {
   int input;
 
-  std::cout << "\t\t***** Welcome To the CFD Input Calculator v04*****" << "\n\n";
+  std::cout << "\t\t***** Welcome To the CFD Input Calculator v05*****" << "\n\n";
   std::cout << "- This tool is used for calculating CFD inputs with dry air properties." << "\n";
   std::cout << "- Aim of this program is to find characteristics of Turbulent Flows!" << "\n";
   std::cout << "- For the numerical inputs if you enter a character program won't work." << "\n\n";
@@ -440,6 +451,7 @@ int main() {
       case 3:
       turbulence_length_scale_calculator();
       //turbulent_length_scale_commercial_softwares_calculator();
+      std::cout << "Turbulence Length Scale : " << turbulence_length_scale << "[m]" << "\n";
       std::cout << "Maximum Turbulence Length Scale : " << max_turbulence_length_scale<< "[m]" << "\n";
       std::cout << "\n";
       //std::cout << "Turbulence Length Scale for Commercial CFD Solvers : "<< turbulent_length_scale_commercial_softwares<< "[m]" << "\n";
