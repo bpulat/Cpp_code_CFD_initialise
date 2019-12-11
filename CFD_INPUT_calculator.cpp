@@ -128,7 +128,6 @@ void write_file() {
     if (turbulence_length_scale != 0) {
       myfile << "Turbulence Length Scale: " << turbulence_length_scale << " [m]" << "\n";
       myfile << "Maximum Turbulence Length Scale: " << max_turbulence_length_scale<< " [m]" << "\n";
-      myfile << "Turbulence Length Scale of Commercial CFD Solvers : " << turbulent_length_scale_commercial_softwares<< "[m]" << "\n";
     }
     if (turbulent_kinetic_energy != 0){
       myfile << "Turbulent Kinetic Energy : " << turbulent_kinetic_energy << " [m^2/s^2]" << "\n";
