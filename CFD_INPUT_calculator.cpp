@@ -84,7 +84,6 @@ void getTime(int &year, int &month, int &day, int &hour, int &mins, int &secs, i
   secs    = TM.tm_sec ;
   weekDay = TM.tm_wday ;
 }
-
 // Save the program input and outputs to a .txt file
 void write_file() {
   std::string file_name;
@@ -169,13 +168,11 @@ void write_file() {
     myfile.close();
   }
   else std::cout << "Unable to open file" ;
-
 }
-
 void turbulence_intensity_calculator() {
+  // The estimation here is that the flow is inside a tube where also our enclosure is like a tube
   reynolds = velocity*density*hydraulic_diameter/dynamic_viscosity;
   turbulence_intensity = 0.16 * pow(reynolds,-.1/.8) * 100; // written in percentage %
-
 }
 void turbulence_length_scale_calculator() {
   reynolds_number_for_downstream = velocity*density*domain_c/dynamic_viscosity;
@@ -234,10 +231,7 @@ void turbulent_dissipation_rate_calculator(){ // Also as know as epsilon in (k-e
 void turbulence_specific_dissipation_rate_calculator(){
   // Also as known as omega in (k-w SST model w)
   turbulent_kinetic_energy_calculator();
-
   turbulence_specific_dissipation_rate = pow(turbulent_kinetic_energy,0.5)/(Cmu*turbulence_length_scale);
-
-
 }
 void turbulent_length_scale_commercial_softwares_calculator(){
 //  turbulent_kinetic_energy_calculator();
