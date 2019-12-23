@@ -22,7 +22,7 @@ double domain_a,domain_b,domain_c;
 // Inlet velocity value
 double velocity;
 // Location Altitude
-double altitude,density,pressure,hydraulic_diameter,dynamic_viscosity;
+double altitude,temperature,density,pressure,hydraulic_diameter,dynamic_viscosity;
 // Reynolds number
 double reynolds;
 // Wall Space Calculation variables
@@ -49,14 +49,23 @@ double Dynamic_Viscosity[] = {1.789*0.00001,1.783*0.00001,1.777*0.00001,
 1.608*0.00001,1.602*0.00001,1.595*0.00001,1.588*0.00001,1.582*0.00001,
 1.575*0.00001,1.568*0.00001,1.561*0.00001,1.527*0.00001,1.493*0.00001,
 1.458*0.00001,1.422*0.00001,1.422*0.00001,1.422*0.00001,1.422*0.00001};
+// temperature kelvin to calculate cp
+double temperature_K [] = {60,78.79,81.61,100,120,140,160,180,200,220,240,260,273.2,280,288.7,300,320,340,360,380,400,500,600,700,800,900,1100,1500,1900
+};
+double dry_air_cp_table [] = {1.901,1.933,1.089,1.04,1.022,1.014,1.011,1.008,1.007,1.006,1.006,1.006,1.006,1.006,1.006,1.006,1.007,1.009,1.01,1.012,1.014,1.03,1.051,1.075,1.099,1.121,1.159,1.21,1.241};
+// temperature celcius to calcuate thermal conductivity (k)
+double temperature_C [] = {-190,-150,-100,-75,-50,-25,-15,-10,-5,0,5,10,15,20,25,30,40,50,60,80,100,125,150,175,200,225,300,412,500,600,700,800,900,1000,1100};
+double thermal_conductivity_table [] = {7.82,11.69,16.2,18.34,20.41,22.41,23.2,23.59,23.97,24.36,24.74,25.12,25.5,25.87,26.24,26.62,27.35,28.08,28.8,30.23,31.62,33.33,35,36.64,38.25,39.83,44.41,50.92,55.79,61.14,66.32,71.35,76.26,81.08,85.83};
 double desired_permeability_perc,desired_permeability,porous_thickness;
 double resistance_coefficient = 0;
 int array_length  = (sizeof(Altitude) / sizeof (*Altitude));
 double kinematic_viscosity;
+double thermal_conductivity, dry_air_cp;
 double interp_result;
+double prandtl_number;
 double boundary_layer_thickness,reynolds_number_for_downstream;
 double turbulence_intensity,turbulence_length_scale,max_turbulence_length_scale;
-int altitude_choice;
+int altitude_choice, thermal_choice;
 double turbulent_dissipation_rate,turbulent_kinetic_energy,turbulence_specific_dissipation_rate;
 double turbulent_length_scale_commercial_softwares;
 double Cmu = 0.09;        // An emprical constant specified in the turbulence model (approx. 0.09)
@@ -109,14 +118,23 @@ void write_file() {
       myfile << "Kinematic Viscosity: " << kinematic_viscosity << " [m^2/s]" << "\n";
 
     }
-    myfile << "\n";
+    if (thermal_choice == 1) {
+      myfile << "Temperature: " << temperature << " [Celcius]" << "\n";
+    }
+    else if (thermal_choice == 2){
+      myfile << "No Thermal condition selected !" << "\n";
+    }
+      myfile << "\n";
     //  OUTPUTS
     myfile << "Outputs:" << "\n";
-    if (altitude_choice == 1) {
+    if (altitude_choice == 1 & thermal_choice == 1) {
       myfile << "Density: " << density << " [kg/m^3]" << "\n";
       myfile << "Dynamic Viscosity: " << dynamic_viscosity << " [Pa*s]" << "\n";
       myfile << "Kinematic Viscosity: " << kinematic_viscosity << " [m^2/s]" << "\n";
       myfile << "Pressure: " << pressure << " [kPa]" << "\n";
+      myfile << "Thermal conductivity(k): " << thermal_conductivity << " [W/m.K]" << "\n";
+      myfile << "Specific heat constant(Cp): " << dry_air_cp << " [J/kg.K]" << "\n";
+      myfile << "Prandtl number : " << prandtl_number << " [-]" << "\n";
     }
     if (reynolds != 0) {
       myfile << "Reynolds Number: " << reynolds << "\n";
@@ -352,19 +370,18 @@ void first_inputs() {
         std::cout << "Enter the altitude of your case [m]: ";
         std::cin >> altitude;
       }
-      std::cout << "\n\n";
-      std::cout << "\t\t***** Dry Air Properties ******" << "\n\n";
+;
       linear_interpolation(altitude,Altitude,Density);
       density = interp_result;
-      std::cout << "Density : " << density << "[kg/m^3]" << "\n";
+
       linear_interpolation(altitude,Altitude,Pressure);
       pressure = interp_result;
-      std::cout << "Pressure : " << pressure << "[kPa]" << "\n";
+
       linear_interpolation(altitude,Altitude,Dynamic_Viscosity);
       dynamic_viscosity = interp_result;
-      std::cout << "Dynamic Viscosity: " << dynamic_viscosity << "[Pa*s]" << "\n";
+
       kinematic_viscosity = dynamic_viscosity / density;
-      std::cout << "Kinematic Viscosity: " << kinematic_viscosity << "[m^2/s]" << "\n";
+
       break;
       case 2:
       std::cout << "Enter your density value: " ;
@@ -395,10 +412,71 @@ void first_inputs() {
       std::cout << "\n";
       break;
     }
-    }
-    while((altitude_choice != 1) && (altitude_choice != 2));
-}
+  }
+  while((altitude_choice != 1) && (altitude_choice != 2));
 
+    do {
+      std::cout << "\n";
+      std::cout << "If your case depends on the thermal properties \t\t(PRESS 1) " << "\n";
+      std::cout << "If you don't need the thermal properties \t\t(PRESS 2)  " << "\n\n";
+      std::cout << "Your choice : " ;
+      std::cin >> thermal_choice;
+      while(std::cin.fail()) {
+        std::cout << "*********************************" << "\n";
+        std::cout << "\tError character INPUT !" << "\n";
+        std::cout << "\tRE-DO YOUR CHOICE !" << "\n";
+        std::cout << "*********************************" << "\n";
+        std::cin.clear();
+        std::cin.ignore(256,'\n');
+        std::cout << "If your case depends on the thermal properties \t\t(PRESS 1) " << "\n";
+        std::cout << "If you don't need the thermal properties \t(PRESS 2)  " << "\n\n";
+        std::cout << "Your choice : " ;
+        std::cin >> thermal_choice;
+      }
+
+      switch (thermal_choice) {
+      case 1:
+      std::cout << "Enter the temperature of your case [Celcius]: ";
+      std::cin >> temperature;
+      while(std::cin.fail() || altitude < 0) {
+        std::cout << "ERROR INPUT!" << "\n";
+        std::cin.clear();
+        std::cin.ignore(256,'\n');
+        std::cout << "Enter the temperature of your case [Celcius]: ";
+        std::cin >> temperature;
+      }
+      std::cout << "\n\n";
+      std::cout << "\t\t***** Dry Air Properties ******" << "\n\n";
+      std::cout << "Density : " << density << "[kg/m^3]" << "\n";
+      std::cout << "Pressure : " << pressure << "[kPa]" << "\n";
+      std::cout << "Dynamic Viscosity: " << dynamic_viscosity << "[Pa*s]" << "\n";
+      std::cout << "Kinematic Viscosity: " << kinematic_viscosity << "[m^2/s]" << "\n";
+      linear_interpolation(temperature,temperature_C,thermal_conductivity_table);
+      thermal_conductivity = interp_result ;
+      // To convert the units
+      thermal_conductivity = thermal_conductivity / 1000 ;
+      std::cout << "Thermal conductivity : " << thermal_conductivity << "[W/m.K]" << "\n";
+      linear_interpolation(temperature+273.15,temperature_K,dry_air_cp_table);
+      dry_air_cp = interp_result;
+      // To convert the units
+      dry_air_cp = dry_air_cp*1000;
+      std::cout << "Isobaric specific heat (Cp) : " << dry_air_cp << "[J/kg.K]" << "\n";
+      prandtl_number = dry_air_cp * dynamic_viscosity / thermal_conductivity;
+      std::cout << "Prandtl number : " << prandtl_number << "[-]" << "\n";
+      break;
+      case 2:
+      std::cout << "\n\n";
+      std::cout << "\t\t***** Dry Air Properties ******" << "\n\n";
+      std::cout << "Density : " << density << "[kg/m^3]" << "\n";
+      std::cout << "Pressure : " << pressure << "[kPa]" << "\n";
+      std::cout << "Dynamic Viscosity: " << dynamic_viscosity << "[Pa*s]" << "\n";
+      std::cout << "Kinematic Viscosity: " << kinematic_viscosity << "[m^2/s]" << "\n";
+      continue;
+      break;
+    }
+  }
+  while((thermal_choice != 1) && (thermal_choice != 2));
+}
 int main() {
   int input;
 
