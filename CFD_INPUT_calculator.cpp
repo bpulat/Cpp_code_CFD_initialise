@@ -370,16 +370,12 @@ void first_inputs() {
         std::cout << "Enter the altitude of your case [m]: ";
         std::cin >> altitude;
       }
-;
       linear_interpolation(altitude,Altitude,Density);
       density = interp_result;
-
       linear_interpolation(altitude,Altitude,Pressure);
       pressure = interp_result;
-
       linear_interpolation(altitude,Altitude,Dynamic_Viscosity);
       dynamic_viscosity = interp_result;
-
       kinematic_viscosity = dynamic_viscosity / density;
 
       break;
