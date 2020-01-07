@@ -1,13 +1,9 @@
 /*
-CFD INPUT CALCULATOR made for EIE GROUP SRL by Baris PULAT 05/04/2019
-- Revision 11/04/2019 now while saving .txt file name can be changed.
-- Revision 11/04/2019 output file now has the time, date in the outpus and some bugs are fixed.
-- Revision 27/05/2019 fix turbulent_dissipation_rate and turbulent_kinetic_energy and its plots, fix
-plotting the values.
-- Adjust all openfoam inputs
-* Possible next revision adding also thermal properties. (Calculation of Nusselt Number etc..)
-
+**********************************************************
+CFD INPUT CALCULATOR made for EIE GROUP SRL by Baris PULAT
+**********************************************************
 */
+
 #include <iostream>
 //#include <cmath>
 #include <float.h>
@@ -17,6 +13,11 @@ plotting the values.
 #include <iomanip>
 #include <string>
 #include <math.h>
+/*
+*********************************************************************
+****************************  VARIABLES *****************************
+*********************************************************************
+*/
 // Domain size variables representing 3 dimension variables in meters
 double domain_a,domain_b,domain_c;
 // Inlet velocity value
@@ -49,12 +50,16 @@ double Dynamic_Viscosity[] = {1.789*0.00001,1.783*0.00001,1.777*0.00001,
 1.608*0.00001,1.602*0.00001,1.595*0.00001,1.588*0.00001,1.582*0.00001,
 1.575*0.00001,1.568*0.00001,1.561*0.00001,1.527*0.00001,1.493*0.00001,
 1.458*0.00001,1.422*0.00001,1.422*0.00001,1.422*0.00001,1.422*0.00001};
-// temperature kelvin to calculate cp
-double temperature_K [] = {60,78.79,81.61,100,120,140,160,180,200,220,240,260,273.2,280,288.7,300,320,340,360,380,400,500,600,700,800,900,1100,1500,1900};
-double dry_air_cp_table [] = {1.901,1.933,1.089,1.04,1.022,1.014,1.011,1.008,1.007,1.006,1.006,1.006,1.006,1.006,1.006,1.006,1.007,1.009,1.01,1.012,1.014,1.03,1.051,1.075,1.099,1.121,1.159,1.21,1.241};
-// temperature celcius to calcuate thermal conductivity (k)
-double temperature_C [] = {-190,-150,-100,-75,-50,-25,-15,-10,-5,0,5,10,15,20,25,30,40,50,60,80,100,125,150,175,200,225,300,412,500,600,700,800,900,1000,1100};
-double thermal_conductivity_table [] = {7.82,11.69,16.2,18.34,20.41,22.41,23.2,23.59,23.97,24.36,24.74,25.12,25.5,25.87,26.24,26.62,27.35,28.08,28.8,30.23,31.62,33.33,35,36.64,38.25,39.83,44.41,50.92,55.79,61.14,66.32,71.35,76.26,81.08,85.83};
+// Temperature in unit Kelvin table data to calculate cp
+double temperature_K [] = {60,78.79,81.61,100,120,140,160,180,200,220,240,260,273.2,280,288.7,300,320,340,360,380,
+400,500,600,700,800,900,1100,1500,1900};
+double dry_air_cp_table [] = {1.901,1.933,1.089,1.04,1.022,1.014,1.011,1.008,1.007,1.006,1.006,1.006,1.006,1.006,
+1.006,1.006,1.007,1.009,1.01,1.012,1.014,1.03,1.051,1.075,1.099,1.121,1.159,1.21,1.241};
+// Temperature in unit Celcius to calculate thermal conductivity (k)
+double temperature_C [] = {-190,-150,-100,-75,-50,-25,-15,-10,-5,0,5,10,15,20,25,30,40,50,60,80,100,125,150,175,
+200,225,300,412,500,600,700,800,900,1000,1100};
+double thermal_conductivity_table [] = {7.82,11.69,16.2,18.34,20.41,22.41,23.2,23.59,23.97,24.36,24.74,25.12,25.5,
+25.87,26.24,26.62,27.35,28.08,28.8,30.23,31.62,33.33,35,36.64,38.25,39.83,44.41,50.92,55.79,61.14,66.32,71.35,76.26,81.08,85.83};
 double desired_permeability_perc,desired_permeability,porous_thickness;
 double resistance_coefficient = 0;
 int array_length  = (sizeof(Altitude) / sizeof (*Altitude));
@@ -68,10 +73,10 @@ int altitude_choice, thermal_choice;
 double turbulent_dissipation_rate,turbulent_kinetic_energy,turbulence_specific_dissipation_rate;
 double turbulent_length_scale_commercial_softwares;
 double Cmu = 0.09;        // An emprical constant specified in the turbulence model (approx. 0.09)
+
 //Time and Date
 std::string monthString[] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 std::string dayString[] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
-
 
 // Clear input buffer
 int clear_input_buffer(void) {
@@ -79,6 +84,7 @@ int clear_input_buffer(void) {
     while (((ch = getchar()) != EOF) && (ch != '\n')) /* void */;
     return ch;
 }
+// To get date and time
 void getTime(int &year, int &month, int &day, int &hour, int &mins, int &secs, int &weekDay) {
   time_t tt;
   time( &tt );
@@ -92,7 +98,12 @@ void getTime(int &year, int &month, int &day, int &hour, int &mins, int &secs, i
   secs    = TM.tm_sec ;
   weekDay = TM.tm_wday ;
 }
-// Save the program input and outputs to a .txt file
+
+/*
+Save the program input and outputs to a .txt file
+This function gets all the variables obtained and checks if there is a value attached to it
+and if attached writes those variables in a txt file
+*/
 void write_file() {
   std::string file_name;
   std::string str2 = ".txt";
@@ -188,6 +199,7 @@ void write_file() {
 }
 void turbulence_intensity_calculator() {
   // The estimation here is that the flow is inside a tube where also our enclosure is like a tube
+  // For fully developed pipe flow the turbulence intensity at the core
   reynolds = velocity*density*hydraulic_diameter/dynamic_viscosity;
   turbulence_intensity = 0.16 * pow(reynolds,-.1/.8) * 100; // written in percentage %
 }
