@@ -503,7 +503,7 @@ void first_inputs() {
 int main() {
   int input;
 
-  std::cout << "\t\t***** Welcome To the CFD Input Calculator v06 *****" << "\n\n";
+  std::cout << "\t\t***** Welcome To the CFD Input Calculator v07 *****" << "\n\n";
   std::cout << "- This tool is used for calculating CFD inputs with dry air properties." << "\n";
   std::cout << "- Aim of this program is to find characteristics of Turbulent Flows!" << "\n";
   std::cout << "- For the numerical inputs if you enter a character program won't work." << "\n\n";
