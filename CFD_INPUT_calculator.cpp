@@ -146,6 +146,22 @@ void write_file() {
       myfile << "Specific heat constant(Cp): " << dry_air_cp << " [J/kg.K]" << "\n";
       myfile << "Prandtl number : " << prandtl_number << " [-]" << "\n";
     }
+    if (altitude_choice == 1 & thermal_choice == 2){
+      myfile << "Density: " << density << " [kg/m^3]" << "\n";
+      myfile << "Dynamic Viscosity: " << dynamic_viscosity << " [Pa*s]" << "\n";
+      myfile << "Kinematic Viscosity: " << kinematic_viscosity << " [m^2/s]" << "\n";
+      myfile << "Pressure: " << pressure << " [kPa]" << "\n";
+    }
+    if (altitude_choice == 2 & thermal_choice == 1){
+      myfile << "Pressure: " << pressure << " [kPa]" << "\n";
+      myfile << "Thermal conductivity(k): " << thermal_conductivity << " [W/m.K]" << "\n";
+      myfile << "Specific heat constant(Cp): " << dry_air_cp << " [J/kg.K]" << "\n";
+      myfile << "Prandtl number : " << prandtl_number << " [-]" << "\n";
+    }
+    if (altitude_choice == 2 & thermal_choice == 2) {
+      myfile << "Pressure: " << pressure << " [kPa]" << "\n";
+    }
+
     if (reynolds != 0) {
       myfile << "Reynolds Number: " << reynolds << "\n";
     }
