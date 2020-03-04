@@ -326,7 +326,7 @@ void permeability_calculator() {
     }
     double f = desired_permeability;
 
-    resistance_coefficient = (1 / pow(f,2)) * pow((0.707 * pow((1-f),0.5) + 1 - f),2);
+    resistance_coefficient = (1 / pow(f,2)) * pow((0.707 * pow((1-f),0.5) + 1 - f),2) / porous_thickness;
 
 }
 void first_inputs() {
