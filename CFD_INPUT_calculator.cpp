@@ -425,6 +425,15 @@ void first_inputs() {
         std::cout << "Enter your dynamic viscosity value: " ;
         std::cin >> dynamic_viscosity;
       }
+      std::cout << "Enter your pressure value: " ;
+      std::cin >> pressure;
+      while(std::cin.fail() || pressure <= 0) {
+        std::cout << "ERROR INPUT!" << "\n";
+        std::cin.clear();
+        std::cin.ignore(256,'\n');
+        std::cout << "Enter your pressure value: " ;
+        std::cin >> pressure;
+      }
       kinematic_viscosity = dynamic_viscosity / density;
       break;
       default:
@@ -503,7 +512,7 @@ void first_inputs() {
 int main() {
   int input;
 
-  std::cout << "\t\t***** Welcome To the CFD Input Calculator v07 *****" << "\n\n";
+  std::cout << "\t\t***** Welcome To the CFD Input Calculator v08 *****" << "\n\n";
   std::cout << "- This tool is used for calculating CFD inputs with dry air properties." << "\n";
   std::cout << "- Aim of this program is to find characteristics of Turbulent Flows!" << "\n";
   std::cout << "- For the numerical inputs if you enter a character program won't work." << "\n\n";
