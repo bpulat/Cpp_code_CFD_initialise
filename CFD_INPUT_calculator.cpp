@@ -268,10 +268,15 @@ void turbulent_kinetic_energy_calculator(){
   turbulence_intensity_calculator();
   turbulent_kinetic_energy = 1.5 * (velocity*turbulence_intensity/100)*(velocity*turbulence_intensity/100);
 }
-void turbulent_dissipation_rate_calculator(){ // Also as know as epsilon in (k-e turbulence model)
+void turbulent_dissipation_rate_calculator(){ // Also as known as epsilon in (k-e turbulence model)
   turbulence_length_scale_calculator();
   turbulent_kinetic_energy_calculator();
   turbulent_dissipation_rate = pow(Cmu,0.75)*pow(turbulent_kinetic_energy,1.5)/turbulence_length_scale;
+}
+void turbulent_specific_dissipation_rate_calculator(){ // Also as known as w (omega) in k-w turbulence model
+  turbulence_length_scale_calculator();
+  turbulent_kinetic_energy_calculator();
+  turbulent_specific_dissipation_rate = pow(turbulent_kinetic_energy,0.5)/(Cmu*turbulence_length_scale);
 }
 void turbulence_specific_dissipation_rate_calculator(){
   // Also as known as omega in (k-w SST model w)
