@@ -70,7 +70,7 @@ double prandtl_number;
 double boundary_layer_thickness,reynolds_number_for_downstream;
 double turbulence_intensity,turbulence_length_scale,max_turbulence_length_scale;
 int altitude_choice, thermal_choice;
-double turbulent_dissipation_rate,turbulent_kinetic_energy,turbulence_specific_dissipation_rate;
+double turbulent_dissipation_rate,turbulent_kinetic_energy,turbulent_specific_dissipation_rate;
 double turbulent_length_scale_commercial_softwares;
 double Cmu = 0.09;        // An emprical constant specified in the turbulence model (approx. 0.09)
 
@@ -173,11 +173,15 @@ void write_file() {
       myfile << "Maximum Turbulence Length Scale: " << max_turbulence_length_scale<< " [m]" << "\n";
     }
     if (turbulent_kinetic_energy != 0){
-      myfile << "Turbulent Kinetic Energy : " << turbulent_kinetic_energy << " [m^2/s^2]" << "\n";
+      myfile << "Turbulence Kinetic Energy: " << turbulent_kinetic_energy << " [m^2/s^2]" << "\n";
     }
     if (turbulent_dissipation_rate !=0){
-      myfile << "Turbulent Dissipation Rate : " << turbulent_dissipation_rate << " [m^2/s^3]" << "\n";
+      myfile << "Turbulence Dissipation Rate: " << turbulent_dissipation_rate << " [m^2/s^3]" << "\n";
     }
+    if (turbulent_specific_dissipation_rate != 0){
+      myfile << "Specific Turbulence Dissipation Rate: " << turbulent_specific_dissipation_rate << " [1/s]" << "\n";
+    }
+
     if (yplus_desired != 0){
       myfile << "\n";
       myfile << "Wall Space Calculation" << "\n";
@@ -277,11 +281,6 @@ void turbulent_specific_dissipation_rate_calculator(){ // Also as known as w (om
   turbulence_length_scale_calculator();
   turbulent_kinetic_energy_calculator();
   turbulent_specific_dissipation_rate = pow(turbulent_kinetic_energy,0.5)/(Cmu*turbulence_length_scale);
-}
-void turbulence_specific_dissipation_rate_calculator(){
-  // Also as known as omega in (k-w SST model w)
-  turbulent_kinetic_energy_calculator();
-  turbulence_specific_dissipation_rate = pow(turbulent_kinetic_energy,0.5)/(Cmu*turbulence_length_scale);
 }
 void turbulent_length_scale_commercial_softwares_calculator(){
 //  turbulent_kinetic_energy_calculator();
